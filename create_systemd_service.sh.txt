@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Create a systemd service file for the Flask app
+sudo tee /etc/systemd/system/analysis_app.service > /dev/null << EOF
+[Unit]
+Description=Gunicorn instance to serve analysis_app
+After=network.target
+
+[Service]
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/var/www/analysis
+ExecStart=/usr/local/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 analysis_script:app
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Start and enable the service
+sudo systemctl start analysis_app
+sudo systemctl enable analysis_app

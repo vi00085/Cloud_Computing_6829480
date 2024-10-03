@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Update the system
+sudo yum update -y
+
+# Install required packages
+sudo yum install -y httpd24 python3 python3-pip
+
+# Install Python packages
+sudo pip3 install flask boto3 requests yfinance
+
+# Install mod_wsgi
+sudo yum install -y gcc httpd-devel
+sudo pip3 install mod_wsgi
+
+# Create directories
+sudo mkdir -p /var/www/analysis
+sudo chown ec2-user:ec2-user /var/www/analysis
+
+# Copy files to /var/www/analysis
+# Note: Replace this with the actual copying process of your script files to the directory
+# e.g., use scp to copy files from your local machine to the EC2 instance
+
+# Set up Apache configuration
+sudo tee /etc/httpd/conf.d/analysis_app.conf > /dev/null << EOF
+<VirtualHost *:80>
+    ServerName your_server_domain_or_IP
+
+    WSGIDaemonProcess analysis_app user=ec2-user group=ec2-user threads=5
+    WSGIScriptAlias / /var/www/analysis/analysis_script.wsgi
+
+    <Directory /var/www/analysis>
+        Require all granted
+    </Directory>
+
+    Alias /static /var/www/analysis/static
+    <Directory /var/www/analysis/static/>
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+EOF
+
+# Restart Apache
+sudo systemctl restart httpd
+
+# Enable Apache to start on boot
+sudo systemctl enable httpd

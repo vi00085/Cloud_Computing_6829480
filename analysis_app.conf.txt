@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+    ServerName your_server_domain_or_IP
+
+    WSGIDaemonProcess analysis_app user=ec2-user group=ec2-user threads=5
+    WSGIScriptAlias / /var/www/analysis/analysis_script.wsgi
+
+    <Directory /var/www/analysis>
+        Require all granted
+    </Directory>
+
+    Alias /static /var/www/analysis/static
+    <Directory /var/www/analysis/static/>
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
